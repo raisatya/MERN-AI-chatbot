@@ -1,34 +1,81 @@
-import mongoose from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 import { randomUUID } from "crypto";
-const chatSchema = new mongoose.Schema({
+import { Password } from "../utils/Password";
+
+// Define Chat Interface
+interface ChatInterface {
+  id: string;
+  role: "user" | "admin" | "system";
+  content: string;
+}
+
+// Define User Interface
+interface UserInterface extends Document {
+  name: string;
+  email: string;
+  password: string;
+  chats: ChatInterface[];
+}
+
+// Chat Schema
+const chatSchema = new Schema<ChatInterface>({
   id: {
     type: String,
-    default: randomUUID(),
+    default: () => randomUUID(),
   },
   role: {
     type: String,
     required: true,
+    enum: ["user", "admin", "system"],
   },
   content: {
     type: String,
     required: true,
   },
 });
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
+
+// User Schema
+const userSchema = new Schema<UserInterface>(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    chats: [chatSchema],
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  chats: [chatSchema],
+  {
+    timestamps: true,
+    toJSON: {
+      transform(doc, ret) {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.password;
+        delete ret.__v;
+      },
+    },
+  }
+);
+
+// Pre-save hook to hash password if modified
+userSchema.pre("save", async function (done) {
+  if (this.isModified("password")) {
+    const hashed = await Password.toHash(this.get("password"));
+    this.set("password", hashed);
+  }
+  done();
 });
 
-export default mongoose.model("User", userSchema);
+// Create User model
+const User = mongoose.model<UserInterface>("User", userSchema);
+
+export default User;

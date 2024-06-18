@@ -2,9 +2,9 @@ import { Router } from "express";
 import userRoutes from "./user-routes";
 import chatRoutes from "./chat-routes";
 
-const router = Router();
+const appRouter = Router();
 
-router.use("/user", userRoutes);
-router.use("/chats", chatRoutes)
+appRouter.use("/user", userRoutes);
+appRouter.use("/chats", chatRoutes)
 
-export default Router;
+export default appRouter;
