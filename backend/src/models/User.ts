@@ -4,7 +4,6 @@ import { Password } from "../utils/Password";
 
 // Define Chat Interface
 interface ChatInterface {
-  id: string;
   role: "user" | "admin" | "system";
   content: string;
 }
@@ -19,10 +18,6 @@ interface UserInterface extends Document {
 
 // Chat Schema
 const chatSchema = new Schema<ChatInterface>({
-  id: {
-    type: String,
-    default: () => randomUUID(),
-  },
   role: {
     type: String,
     required: true,
