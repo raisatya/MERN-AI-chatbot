@@ -3,21 +3,13 @@ import { randomUUID } from "crypto";
 import { Password } from "../utils/Password";
 
 // Define Chat Interface
-interface ChatInterface {
-  role: "user" | "admin" | "system";
-  content: string;
-}
-
-// Define User Interface
-interface UserInterface extends Document {
-  name: string;
-  email: string;
-  password: string;
-  chats: ChatInterface[];
-}
 
 // Chat Schema
-const chatSchema = new Schema<ChatInterface>({
+const chatSchema = new Schema({
+  id: {
+    type: String,
+    default: randomUUID(),
+  },
   role: {
     type: String,
     required: true,
@@ -30,7 +22,7 @@ const chatSchema = new Schema<ChatInterface>({
 });
 
 // User Schema
-const userSchema = new Schema<UserInterface>(
+const userSchema = new Schema(
   {
     name: {
       type: String,
@@ -71,6 +63,6 @@ userSchema.pre("save", async function (done) {
 });
 
 // Create User model
-const User = mongoose.model<UserInterface>("User", userSchema);
+const User = mongoose.model("User", userSchema);
 
 export default User;
